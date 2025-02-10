@@ -16,6 +16,14 @@
 static const char *TAG = "example";
 QueueHandle_t hid_host_event_queue;
 bool user_shutdown = false;
+int length2 =2;
+const uint8_t transpose[24] = {
+  23, 22, 21, 20, 19, 18, 17, 16,
+  15, 14, 13, 12, 11, 10, 9, 8,
+  7, 6, 5, 4, 3, 2, 1, 0
+};
+
+
 
 /**
  * @brief HID Host event
@@ -28,12 +36,38 @@ typedef struct {
   void *arg;
 } hid_host_event_queue_t;
 
+
+
+
 /**
  * @brief HID Protocol string names
  */
 static const char *hid_proto_name_str[] = {"NONE"};
 
+void transposeBits(const uint8_t data[3], uint8_t dataout[3], const uint8_t transpose[24]) {
+  // Initialize output array to 0
+  memset(dataout, 0, 3);
 
+  // Iterate through each bit position (0-23)
+  for (uint8_t i = 0; i < 24; i++) {
+    // Calculate input byte and bit index
+    uint8_t input_byte = i / 8;
+    uint8_t input_bit = i % 8;
+
+    // Check if this input bit is set
+    if (data[input_byte] & (1 << input_bit)) {
+      // Get corresponding output position from transpose array
+      uint8_t output_pos = transpose[i];
+
+      // Calculate output byte and bit index
+      uint8_t output_byte = output_pos / 8;
+      uint8_t output_bit = output_pos % 8;
+
+      // Set the bit in the output array
+      dataout[output_byte] |= (1 << output_bit);
+    }
+  }
+}
 /**
  * @brief Makes new line depending on report output protocol type
  *
@@ -82,10 +116,26 @@ static inline bool key_found(const uint8_t *const src, uint8_t key,
 static void hid_host_generic_report_callback(const uint8_t *const data,
                                              const int length) {
   hid_print_new_device_report_header(HID_PROTOCOL_NONE);
-  for (int i = 0; i < min(10, length); i++) {
-    printf("%02X", data[i]);
-  }
+  //for (int i = 0; i < min(10, length); i++) {
+    for (int i = 0; i < min(10, length); i++) {
+      printf("%02X", data[i]);
+    }
+    /* printf("byte1");
+    printf("%02X", data[0]);
+    printf("byte2");
+    printf("%02X", data[1]);
+    printf("byte3");
+    printf("%02X", data[2]);
+
+  
+     */
+  printf("%d\n", length);
   putchar('|');
+  
+//uint8_t sensorData[3] = {0x01, 0x02, 0x03}; // Example input
+//uint8_t processedData[3]; // Output
+
+transposeBits(sensorData, processedData, transpose);
 
   switch (length) {
     // This assumes the HID is a Thrustmaster T16000M flight joystick
