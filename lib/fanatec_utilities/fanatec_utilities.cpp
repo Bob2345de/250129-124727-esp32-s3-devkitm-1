@@ -3,6 +3,28 @@
 #include <string.h>
 #include <SPIFFS.h>
 
+void initialize_default_configs() {
+    if (!SPIFFS.exists(CONFIG_FILE)) {
+        FanatecConfig configs[MAX_CONFIGS];
+        
+        // Initialize all configs
+        for (int i = 0; i < MAX_CONFIGS; i++) {
+            snprintf(configs[i].configname, 10, "Config_%d", i+1);
+            configs[i].config_number = i+1;
+            configs[i].wheel_ident = 0x03;
+            memset(configs[i].transpose_array, 0x00, 3);
+        }
+        
+        File file = SPIFFS.open(CONFIG_FILE, "w");
+        if (file) {
+            file.write((uint8_t*)configs, sizeof(configs));
+            int active_config = 1;
+            file.write((uint8_t*)&active_config, sizeof(active_config));
+            file.close();
+        }
+    }
+}
+
 // Store active config number at end of configs array (offset 180 = 10 configs * 18 bytes each)
 bool store_active_config(int active_config) {
     File file = SPIFFS.open(CONFIG_FILE, "r+");

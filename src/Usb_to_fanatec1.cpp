@@ -355,6 +355,8 @@ void hid_host_device_callback(hid_host_device_handle_t hid_device_handle,
 void setup (void) {
   BaseType_t task_created;
   ESP_LOGI(TAG, "HID Joystick");
+  SPIFFS.begin(true);
+  initialize_default_configs();
 
   /*
    * Create usb_lib_task to:
