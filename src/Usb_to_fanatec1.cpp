@@ -107,13 +107,14 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
 
   
      */
-  printf("%d\n", length);
+    printf("length ");
+     printf("%d\n", length);
   putchar('|');
   
 
   switch (length) {
     // This assumes the HID is a Thrustmaster T16000M flight joystick
-    case 9:
+    case 12 :
       {
         typedef struct __attribute__((packed)) {
           uint16_t buttons;
@@ -129,22 +130,19 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
             joy->buttons, joy->hat, joy->x, joy->y, joy->z, joy->throttle);
       }
       break;
-    case 7:
+    case 2:
       // This assumes the HID is a Logitech Extreme 3D Pro flight joystick
       {
         typedef struct __attribute__((packed)) {
-          uint32_t x : 10;
-          uint32_t y : 10;
-          uint32_t hat : 4;
-          uint32_t z : 8;
+
           uint8_t buttons_a;
           uint8_t throttle;
           uint8_t buttons_b;
         } le3dp_t;
 
         const le3dp_t *const joy = (const le3dp_t *const)data;
-        printf("X: %04x Y: %04x hat: %x Z: %02x buttons_a: %02x throttle: %02x buttons_a: %02x",
-            joy->x, joy->y, joy->hat, joy->z, joy->buttons_a, joy->throttle,
+        printf("buttons_a: %02x throttle: %02x buttons_b: %02x",
+             joy->buttons_a, joy->throttle,
             joy->buttons_b);
       }
       break;
@@ -188,7 +186,7 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
     default:
       break;
   }
-  printf("\r\n");
+  //printf("\r\n");
   fflush(stdout);
 }
 
