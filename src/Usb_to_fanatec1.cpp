@@ -7,7 +7,7 @@
 
 #include "driver/gpio.h"
 #include "usb/usb_host.h"
-
+#include "fanatec_utilities.h"
 #include "hid_host.h"
 
 /* GPIO Pin number for quit from example logic */
@@ -44,30 +44,7 @@ typedef struct {
  */
 static const char *hid_proto_name_str[] = {"NONE"};
 
-void transposeBits(const uint8_t data[3], uint8_t dataout[3], const uint8_t transpose[24]) {
-  // Initialize output array to 0
-  memset(dataout, 0, 3);
 
-  // Iterate through each bit position (0-23)
-  for (uint8_t i = 0; i < 24; i++) {
-    // Calculate input byte and bit index
-    uint8_t input_byte = i / 8;
-    uint8_t input_bit = i % 8;
-
-    // Check if this input bit is set
-    if (data[input_byte] & (1 << input_bit)) {
-      // Get corresponding output position from transpose array
-      uint8_t output_pos = transpose[i];
-
-      // Calculate output byte and bit index
-      uint8_t output_byte = output_pos / 8;
-      uint8_t output_bit = output_pos % 8;
-
-      // Set the bit in the output array
-      dataout[output_byte] |= (1 << output_bit);
-    }
-  }
-}
 /**
  * @brief Makes new line depending on report output protocol type
  *
@@ -132,10 +109,6 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
   printf("%d\n", length);
   putchar('|');
   
-//uint8_t sensorData[3] = {0x01, 0x02, 0x03}; // Example input
-//uint8_t processedData[3]; // Output
-
-transposeBits(sensorData, processedData, transpose);
 
   switch (length) {
     // This assumes the HID is a Thrustmaster T16000M flight joystick
