@@ -98,6 +98,7 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
     for (int i = 0; i < min(10, length); i++) {
       printf("%02X", data[i]);
     }
+    putchar('|');
     /* printf("byte1");
     printf("%02X", data[0]);
     printf("byte2");
@@ -107,29 +108,45 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
 
   
      */
-    printf("length ");
+ /*   printf("length ");
      printf("%d\n", length);
-  putchar('|');
+  
   
 
   switch (length) {
     // This assumes the HID is a Thrustmaster T16000M flight joystick
-    case 12 :
+    case 3:
+    // This assumes the HID is a Logitech Extreme 3D Pro flight joystick
+    {
+      typedef struct __attribute__((packed)) {
+
+        uint8_t buttons_a;
+        uint8_t buttons_b;
+        uint8_t buttons_c;
+        uint8_t buttons_d;
+       
+      } le3dp_t;
+
+      const le3dp_t *const joy = (const le3dp_t *const)data;
+      printf("buttons_a:  %02x buttons_b: %02x button_c: %02x buttons_d: %02x",
+        joy->buttons_a, joy->buttons_b, joy->buttons_c,joy->buttons_d);
+        } 
+
+    case 1:
+      // This assumes the HID is a Logitech Extreme 3D Pro flight joystick
       {
         typedef struct __attribute__((packed)) {
-          uint16_t buttons;
-          uint8_t hat;
-          uint16_t x;
-          uint16_t y;
-          uint8_t z;  // Twist
-          uint8_t throttle;
-        } t16k_t;
 
-        const t16k_t *const joy = (const t16k_t *const)data;
-        printf("buttons: %04x hat: %2x X: %04x Y: %04x Z: %02x throttle: %02x",
-            joy->buttons, joy->hat, joy->x, joy->y, joy->z, joy->throttle);
-      }
-      break;
+          uint8_t buttons_a;
+          uint8_t buttons_b;
+        } le3dp_t;
+
+        const le3dp_t *const joy = (const le3dp_t *const)data;
+        printf("buttons_a: %02x buttons_b: %02x",
+             joy->buttons_a, joy->buttons_b);
+             printf("\r\n");
+          }
+
     case 2:
       // This assumes the HID is a Logitech Extreme 3D Pro flight joystick
       {
@@ -145,49 +162,15 @@ static void hid_host_generic_report_callback(const uint8_t *const data,
              joy->buttons_a, joy->throttle,
             joy->buttons_b);
       }
-      break;
-    case 64:
-      {
-        // Assume the HID is a Sony Dual Shock 4 PlayStation 4 game controller
-        // 14 Buttons, 6 Axes, 1 D-Pad
-        typedef struct __attribute__((packed)) {
-          uint8_t ReportID;   // always 0x01
-          uint8_t leftXAxis;
-          uint8_t leftYAxis;
-          uint8_t rightXAxis;
-          uint8_t rightYAxis;
-          uint8_t dPad:4;     // dpad[3-0]
-          uint8_t button1:4;  // Triangle[7], circle[6], cross[5], square[4]
-          uint8_t button2;    // R3:7,L3:6,Options:5,share:4,R2:3,L2:2,R1:1,L1:0
-          uint8_t button3:2;  // tpad click[1], logo[0]
-          uint8_t reportCnt:6;
-          uint8_t L2Axis;
-          uint8_t R2Axis;
-          uint16_t timestamp; // increment by 188 per report
-          uint8_t batteryLvl;
-          uint16_t gyroX;
-          uint16_t gyroY;
-          uint16_t gyroZ;
-          int16_t accelX;
-          int16_t accelY;
-          int16_t accelZ;
-          uint8_t filler[39];
-        } DS4GamepadReport_t;
-        const DS4GamepadReport_t *const ds4 =
-          (const DS4GamepadReport_t *const)data;
-        printf("Left X,Y: %3u,%3u Right X,Y: %3u,%3u "
-            "DPad: %x Button1: 0x%x Button2: 0x%02x Button3: 0x%x "
-            "Throttle Left,Right: %3u,%3u",
-            ds4->leftXAxis, ds4->leftYAxis, ds4->rightXAxis, ds4->rightYAxis,
-            ds4->dPad, ds4->button1, ds4->button2, ds4->button3,
-            ds4->L2Axis, ds4->R2Axis);
-        break;
-      }
-    default:
+      default:
       break;
   }
-  //printf("\r\n");
-  fflush(stdout);
+
+  
+  // delayMicroseconds(2000000);
+  */
+  fflush(stdout);                 
+  printf("\r\n");
 }
 
 /**
